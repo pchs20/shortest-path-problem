@@ -1,0 +1,8 @@
+flake8==7.1.1
+mccabe==0.7.0
+ply @ file:///home/conda/feedstock_root/build_artifacts/ply_1712242996588/work
+pycodestyle==2.12.1
+pyflakes==3.2.0
+Pyomo @ file:///Users/runner/miniforge3/conda-bld/pyomo_1708550612593/work
+setuptools==75.1.0
+wheel==0.44.0

@@ -1,0 +1,90 @@
+2 Set Declarations
+    edges : Edges of the graph.
+        Size=1, Index=None, Ordered=Insertion
+        Key  : Dimen : Domain            : Size : Members
+        None :     2 : vertices*vertices :   11 : {('A', 'B'), ('B', 'H'), ('H', 'I'), ('I', 'J'), ('A', 'C'), ('A', 'D'), ('D', 'E'), ('A', 'G'), ('G', 'I'), ('A', 'F'), ('F', 'D')}
+    vertices : Vertices of the graph.
+        Size=1, Index=None, Ordered=Insertion
+        Key  : Dimen : Domain : Size : Members
+        None :     1 :    Any :   10 : {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'}
+
+3 Param Declarations
+    edge_weight : Weight for each edge of the graph.
+        Size=11, Index=edges, Domain=NonNegativeReals, Default=None, Mutable=False
+        Key        : Value
+        ('A', 'B') :     1
+        ('A', 'C') :     1
+        ('A', 'D') :     1
+        ('A', 'F') :     1
+        ('A', 'G') :     1
+        ('B', 'H') :     1
+        ('D', 'E') :     1
+        ('F', 'D') :     1
+        ('G', 'I') :     1
+        ('H', 'I') :     1
+        ('I', 'J') :     1
+    end_vertex : Last vertex for the path.
+        Size=1, Index=None, Domain=vertices, Default=None, Mutable=False
+        Key  : Value
+        None :     B
+    start_vertex : Initial vertex for the path.
+        Size=1, Index=None, Domain=vertices, Default=None, Mutable=False
+        Key  : Value
+        None :     A
+
+1 Var Declarations
+    include_edge : Binary variable: 1 if edge is included in the path, 0 otherwise.
+        Size=11, Index=edges
+        Key        : Lower : Value : Upper : Fixed : Stale : Domain
+        ('A', 'B') :     0 :  None :     1 : False :  True : Binary
+        ('A', 'C') :     0 :  None :     1 : False :  True : Binary
+        ('A', 'D') :     0 :  None :     1 : False :  True : Binary
+        ('A', 'F') :     0 :  None :     1 : False :  True : Binary
+        ('A', 'G') :     0 :  None :     1 : False :  True : Binary
+        ('B', 'H') :     0 :  None :     1 : False :  True : Binary
+        ('D', 'E') :     0 :  None :     1 : False :  True : Binary
+        ('F', 'D') :     0 :  None :     1 : False :  True : Binary
+        ('G', 'I') :     0 :  None :     1 : False :  True : Binary
+        ('H', 'I') :     0 :  None :     1 : False :  True : Binary
+        ('I', 'J') :     0 :  None :     1 : False :  True : Binary
+
+1 Objective Declarations
+    objective_function : Minimize the sum of the edge weights that form the path.
+        Size=1, Index=None, Active=True
+        Key  : Active : Sense    : Expression
+        None :   True : minimize : include_edge[A,B] + include_edge[B,H] + include_edge[H,I] + include_edge[I,J] + include_edge[A,C] + include_edge[A,D] + include_edge[D,E] + include_edge[A,G] + include_edge[G,I] + include_edge[A,F] + include_edge[F,D]
+
+3 Constraint Declarations
+    constraint_adjacent_path : The path should be formed by adjacent edges.
+
+            To guarantee that, every vertex (except for the initial and last ones) should have
+            the same ingoing and outgoing selected edges.
+            
+        Size=8, Index=vertices, Active=True
+        Key : Lower : Body                                                        : Upper : Active
+          C :   0.0 :                                           include_edge[A,C] :   0.0 :   True
+          D :   0.0 : include_edge[D,E] - (include_edge[A,D] + include_edge[F,D]) :   0.0 :   True
+          E :   0.0 :                                           include_edge[D,E] :   0.0 :   True
+          F :   0.0 :                       include_edge[F,D] - include_edge[A,F] :   0.0 :   True
+          G :   0.0 :                       include_edge[G,I] - include_edge[A,G] :   0.0 :   True
+          H :   0.0 :                       include_edge[H,I] - include_edge[B,H] :   0.0 :   True
+          I :   0.0 : include_edge[I,J] - (include_edge[H,I] + include_edge[G,I]) :   0.0 :   True
+          J :   0.0 :                                           include_edge[I,J] :   0.0 :   True
+    constraint_end_of_the_path : Define the end of the path.
+
+            From the selected edges of the path, the last vertex should have exactly one more
+            ingoing edge than outgoing.
+            
+        Size=1, Index=None, Active=True
+        Key  : Lower : Body                                      : Upper : Active
+        None :   0.0 : include_edge[B,H] + 1 - include_edge[A,B] :   0.0 :   True
+    constraint_start_of_the_path : Define the beginning of the path.
+
+            From the selected edges of the path, the initial vertex should have exactly one
+            more outgoing edge than ingoing.
+            
+        Size=1, Index=None, Active=True
+        Key  : Lower : Body                                                                                              : Upper : Active
+        None :   1.0 : include_edge[A,B] + include_edge[A,C] + include_edge[A,D] + include_edge[A,G] + include_edge[A,F] :   1.0 :   True
+
+10 Declarations: vertices edges edge_weight start_vertex end_vertex include_edge constraint_start_of_the_path constraint_end_of_the_path constraint_adjacent_path objective_function
